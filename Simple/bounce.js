@@ -14,6 +14,10 @@ function Board() {
     this.current_ball_position_x = null;
     this.current_ball_position_y = null;
 
+    /* Forces */
+    this.force_x = 0;
+    this.force_y = 0;
+
     /* Constants */
     this.ball_radius = 50;
     this.ball_start_angle = 0;
@@ -21,6 +25,7 @@ function Board() {
     this.gravitational_acceleration = 9.75;
 }
 
+/* Start Handler section */
 Board.prototype.spawn = function (x, y) {
     this.spawned = true;
     this.current_ball_position_x = x;
@@ -43,8 +48,12 @@ Board.prototype.click_handler = function (event) {
 };
 
 Board.prototype.mouse_move_handler = function (event) {
-    if (event.buttons == 1 && in_ball(
-        this.current_ball_position_x, this.current_ball_position_y, this.ball_radius, event.pageX, event.pageY)
+    // We drag if we are already dragging of if we start the dragging by clicking inside the ball.
+    if (
+        this.dragged || ( event.buttons == 1 && in_ball(
+            this.current_ball_position_x, this.current_ball_position_y, this.ball_radius, event.pageX, event.pageY
+            )
+        )
     ) {
         this.dragged = true;
         this.drag(event.movementX, event.movementY);
@@ -54,8 +63,9 @@ Board.prototype.mouse_move_handler = function (event) {
 };
 
 Board.prototype.mouse_up_handler = function (event) {
-    this.drag(event.pageX, event.pageY);
+    this.drag_stop(event.pageX, event.pageY);
 };
+/* End Handler section */
 
 Board.prototype.gravity = function () {
     this.current_ball_position_y += this.gravitational_acceleration;
@@ -76,25 +86,56 @@ Board.prototype.bounce = function () {
     if (this.current_ball_position_x - this.ball_radius < 0) {
         /* Left side */
         this.current_ball_position_x = this.ball_radius;
+        this.force_x = 50; // We want to 'bounce' left
     }
     if (this.current_ball_position_x + this.ball_radius > width_limit) {
         /* Right side */
-        this.current_ball_position_x = width_limit
+        this.current_ball_position_x = width_limit;
+        this.force_x = -50; // We want to 'bounce' right
     }
 
     /* Height */
     if (this.current_ball_position_y - this.ball_radius < 0) {
         /* Top side */
         this.current_ball_position_y = this.ball_radius;
+        this.force_y = 50; // We want to bounce 'down'
     }
     if (this.current_ball_position_y > height_limit) {
         /* Bottom side */
-        this.current_ball_position_y = height_limit
+        this.current_ball_position_y = height_limit;
+        this.force_y = -50; // We want to bounce 'up'
     }
 };
 
-Board.prototype.apply_forces = function () {};
+Board.prototype.apply_forces = function () {
+    /*
+        In this function, we 'apply' the forces to the directions, x and y.
+        We apply the force and then decrease it, no we don't apply it forever.
+        Because the force can be positive or negative, 'decrease' means either decreasing by one, in the
+        case of positive functions or adding by one in the case of negative ones.
+    */
 
+    this.current_ball_position_x += this.force_x;
+    this.current_ball_position_y += this.force_y;
+
+    if (this.force_x != 0) {
+        if (this.force_x > 0) {
+            this.force_x -= 1;
+        } else if (this.force_x < 0) {
+            this.force_x += 1;
+        }
+    }
+
+    if (this.force_y != 0) {
+        if (this.force_y > 0) {
+            this.force_y -= 1;
+        } else if (this.force_y < 0) {
+            this.force_y += 1;
+        }
+    }
+};
+
+/* Start Rendering section */
 Board.prototype.clear_canvas = function () {
     this.context.clearRect(
         0, 0, this.canvas.width, this.canvas.height
@@ -127,15 +168,16 @@ Board.prototype.render = function () {
     this.clear_canvas();
     this.render_canvas();
 };
+/* End Rendering section */
 
 Board.prototype.behave = function () {
     if (this.spawned && !this.dragged) {
         this.gravity();
         this.bounce();
         this.apply_forces();
-
-        this.render();
     }
+
+    this.render();
 };
 
 /* Functions */
