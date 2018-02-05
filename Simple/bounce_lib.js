@@ -268,5 +268,5 @@ function circles_intersect(circle_a_x, circle_a_y, circle_b_x, circle_b_y) {
 }
 
 module.exports = {
-    Board, Ball, create_canvas, _set_canvas_size, circles_intersect
+    Ball, _set_canvas_size, circles_intersect
 };
