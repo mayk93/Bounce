@@ -2,12 +2,8 @@
  * Created by michael on 05/02/2018.
  */
 
-/**
- * Created by michael on 05/02/2018.
- */
-
-const bounce = require('../bounce_lib');
-const {Ball, _set_canvas_size, circles_intersect} = bounce;
+const bounce = require("../bounce_lib");
+const { Ball, _set_canvas_size, circles_intersect } = bounce;
 
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;

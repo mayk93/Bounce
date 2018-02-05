@@ -48,13 +48,16 @@ The `HTML` file references two javascript files, `bounce.js` and `bounce_logic.j
 `bounce.js` contains a class definition and utility function definitions. The other file, `bounce_logic.js`
 makes uses of the class and the functions.
 
-The class `Board` is a manager for the canvas and the ball. It keeps track of the current position of
-the ball via `current_ball_position_x` and `current_ball_position_y`, weather the ball is spawned or not,
-what forces are applied in what direction, etc.
+The class `Board` is a manager for the canvas and the balls. It keeps track of the balls and the application
+of forces for each individual ball. By application I mean indirectly, it ensures each individual ball
+invokes it's force application method.
 
-Rendering is handled by the `Board` it's self, by cleaning the entire canvas and redrawing the ball in
-the correct position. It is also responsible for applying forces to the ball, in order to make it behave
-is intended.
+Rendering is handled by the `Board` it's self, by cleaning the entire canvas and redrawing the balls in
+the correct position.
+
+The class `Ball` is a representation of each individual ball. It keeps track of it's own position and
+the forces that are applied to it. It also keeps a id, used to ensure collisions are not counted 
+against it's self and a collision counter, to destroy balls that are stuck in a collision loop.
 
 ---
 
