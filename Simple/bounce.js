@@ -8,12 +8,8 @@ let ball_start_angle = 0;
 let ball_end_angle = 2 * Math.PI;
 let gravitational_acceleration = 9.75;
 
-let force_modifier_x = 2;
-let force_modifier_y = 50;
-
 function Ball() {
-    this.spawned = false;
-    this.dragged = false;
+    self.ball_id = null;
 
     this.current_ball_position_x = null;
     this.current_ball_position_y = null;
@@ -32,96 +28,22 @@ function Ball() {
 
 // /* Start Handler section */
 Ball.prototype.spawn = function (x, y) {
-    this.spawned = true;
     this.current_ball_position_x = x;
     this.current_ball_position_y = y;
 
     /* When we 'spawn' the ball, we drop it, thus we need to apply a little force to it. */
     if (this.canvas) {
-        this.applied_force_y = (1 - (y / this.canvas.height)) * force_modifier_y;
+        this.force_x = [-1, 1][Math.floor(Math.random() * 2)] * (Math.random() * 25 + 10);
+        this.applied_force_y = (1 - (y / this.canvas.height)) * Math.random() * 50 + 25;
     }
 };
-//
-// Ball.prototype.drag = function (x, y) {
-//     this.current_ball_position_x += x;
-//     this.current_ball_position_y += y;
-//
-//     this.direction.push(event.x);
-//     if (this.direction.length > 2) {
-//         this.direction.shift();
-//     }
-// };
-//
-// Ball.prototype.drag_stop = function (x, y) {
-//     if (this.dragged) {
-//         this.dragged = false;
-//
-//         /* When we stop dragging the ball, we drop it, thus we need to apply a little force to it. */
-//         if (this.canvas) {
-//             let x_position;
-//             let direction_value = 0;
-//
-//             if (this.direction.length == 2) {
-//                 direction_value = this.direction[1] - this.direction[0];
-//             }
-//
-//             if (x > this.canvas.width / 2) {
-//                 // When x is in the right half, the x_position is x it's self
-//                 // That is because x is between 0 and SOME_VALUE.
-//                 // We want applied_force_x to be proportional to the distance between ( current position ) and the side
-//                 // the ball is headed to.
-//
-//                 // So, if we are in the right half, applied_force is going to be greatest when it's furthers to the
-//                 // right.
-//
-//                 // When going the other way, we want applied_force_x to be greatest when furthers from the left.
-//
-//                 x_position = x;
-//             } else {
-//                 x_position = -1 * (this.canvas.width - x);
-//             }
-//
-//             this.force_x = direction_value;
-//             this.applied_force_x = (
-//                 x_position / this.canvas.width
-//             ) * direction_value * force_modifier_x;
-//
-//             this.applied_force_y = (1 - (y / this.canvas.height)) * force_modifier_y;
-//         }
-//     }
-// };
-//
-// Ball.prototype.click_handler = function (event) {
-//     if (!this.spawned) {
-//         this.spawn(event.pageX, event.pageY);
-//     }
-// };
-//
-// Ball.prototype.mouse_move_handler = function (event) {
-//     // We drag if we are already dragging of if we start the dragging by clicking inside the ball.
-//     if (
-//         this.dragged || ( event.buttons == 1 && in_ball(
-//             this.current_ball_position_x, this.current_ball_position_y, ball_radius, event.pageX, event.pageY
-//             )
-//         )
-//     ) {
-//         this.dragged = true;
-//         this.drag(event.movementX, event.movementY);
-//     } else {
-//         this.drag_stop(event.pageX, event.pageY);
-//     }
-// };
-//
-// Ball.prototype.mouse_up_handler = function (event) {
-//     this.drag_stop(event.pageX, event.pageY);
-// };
 /* End Handler section */
 
 Ball.prototype.gravity = function () {
     this.current_ball_position_y += gravitational_acceleration;
 };
 
-Ball.prototype.bounce = function () {
+Ball.prototype.bounce = function (other_balls) {
     /* The reason we use ball_radius, for example */
     /* this.current_ball_position_x = ball_radius; */
     /* Is because current_ball_position_x refers to the center of the ball. When we hit, in this example */
@@ -129,6 +51,7 @@ Ball.prototype.bounce = function () {
         The left side, we want to reposition the ball a radius away, so it appears as if the side of the ball is stopped
     */
 
+    let self = this;
     let width_limit = this.canvas.width - ball_radius;
     let height_limit = this.canvas.height - ball_radius;
 
@@ -162,6 +85,18 @@ Ball.prototype.bounce = function () {
         this.force_y = -this.applied_force_y; // We want to bounce 'up'
         this.applied_force_y /= 1.2;
     }
+
+    other_balls.map(function (other_ball) {
+        if (self.ball_id !== other_ball.ball_id && circles_intersect(
+                self.current_ball_position_x, self.current_ball_position_y,
+                other_ball.current_ball_position_x, other_ball.current_ball_position_y
+            )
+        ) {
+            //console.log('Circle intersection between ', self.ball_id, " and ", other_ball.ball_id)
+            self.force_x = [-1, 1][Math.floor(Math.random() * 2)] * (Math.random() * 25 + 10);
+            self.applied_force_y = (1 - (self.current_ball_position_y / self.canvas.height)) * Math.random() * 50 + 25;
+        }
+    });
 
     /* Force stop */
     /* In order to avoid perpetual bounce, we just set the applied force to zero once it gets too small. */
@@ -251,11 +186,11 @@ Board.prototype.render = function () {
 /* End Rendering section */
 
 Board.prototype.behave = function () {
-    this.balls.map(function (ball) {
-        // console.log('Dealing with ball: ', ball);
+    let self = this;
 
+    this.balls.map(function (ball) {
         ball.gravity();
-        ball.bounce();
+        ball.bounce(self.balls);
         ball.apply_forces();
     });
 
@@ -264,6 +199,7 @@ Board.prototype.behave = function () {
 
 Board.prototype.click_handler = function (event) {
     let new_ball = new Ball();
+    new_ball.ball_id = (+ new Date()).toString();
     new_ball.canvas = this.canvas;
     new_ball.spawn(event.pageX, event.pageY);
 
@@ -293,11 +229,21 @@ function _set_canvas_size(canvas_id) {
     }
 }
 
-function in_ball(circle_x, circle_y, circle_radius, point_x, point_y) {
-    let point_position = Math.pow(
-        point_x - circle_x, 2
-    ) + Math.pow(
-        point_y - circle_y, 2
-    );
-    return point_position < Math.pow(circle_radius, 2)
+function circles_intersect(circle_a_x, circle_a_y, circle_b_x, circle_b_y) {
+    let circle_point = Math.pow((circle_a_x - circle_b_x), 2) + Math.pow((circle_a_y - circle_b_y), 2);
+
+    // console.log('Circles: ', circle_a_x, circle_a_y, circle_b_x, circle_b_y)
+    // console.log('CP: ', circle_point)
+
+    if (circle_point < 0) {
+        return false;
+    } else if (circle_point > Math.pow(2 * ball_radius, 2)) {
+        return false;
+    }
+
+    return true;
+
+    // return (
+    //     0 <= circle_point <= Math.pow(2 * ball_radius, 2)
+    // )
 }
