@@ -8,16 +8,19 @@
 const window = {
     innerWidth: 1000,
     innerHeight: 1000
-}
+};
 
-/* Board class - holds information about the ball and the canvas where it is drawn */
-function Board() {
-    /* Canvas and context */
-    this.canvas = null;
-    this.context = null;
+/* Constants */
+let ball_radius = 50;
+let ball_start_angle = 0;
+let ball_end_angle = 2 * Math.PI;
+let gravitational_acceleration = 9.75;
 
-    this.spawned = false;
-    this.dragged = false;
+/* ----- # ----- # ----- # ----- */
+/* Ball Class */
+/* ----- # ----- # ----- # ----- */
+function Ball() {
+    this.ball_id = null;
 
     this.current_ball_position_x = null;
     this.current_ball_position_y = null;
@@ -29,131 +32,49 @@ function Board() {
     this.force_x = 0;
     this.force_y = 0;
 
-    this.direction = [];
-
-    /* Constants */
-    this.ball_radius = 50;
-    this.ball_start_angle = 0;
-    this.ball_end_angle = 2 * Math.PI;
-    this.gravitational_acceleration = 9.75;
-
-    this.force_modifier_x = 2;
-    this.force_modifier_y = 50;
+    this.canvas = null;
 }
 
-/* Start Handler section */
-Board.prototype.spawn = function (x, y) {
-    this.spawned = true;
+// /* Start Handler section */
+Ball.prototype.spawn = function (x, y) {
     this.current_ball_position_x = x;
     this.current_ball_position_y = y;
 
     /* When we 'spawn' the ball, we drop it, thus we need to apply a little force to it. */
     if (this.canvas) {
-        this.applied_force_y = (1 - (y / this.canvas.height)) * this.force_modifier_y;
+        this.force_x = [-1, 1][Math.floor(Math.random() * 2)] * (Math.random() * 25 + 10);
+        this.applied_force_y = (1 - (y / this.canvas.height)) * Math.random() * 50 + 25;
     }
-};
-
-Board.prototype.drag = function (x, y) {
-    this.current_ball_position_x += x;
-    this.current_ball_position_y += y;
-
-    this.direction.push(event.x);
-    if (this.direction.length > 2) {
-        this.direction.shift();
-    }
-};
-
-Board.prototype.drag_stop = function (x, y) {
-    if (this.dragged) {
-        this.dragged = false;
-
-        /* When we stop dragging the ball, we drop it, thus we need to apply a little force to it. */
-        if (this.canvas) {
-            let x_position;
-            let direction_value = 0;
-
-            if (this.direction.length == 2) {
-                direction_value = this.direction[1] - this.direction[0];
-            }
-
-            if (x > this.canvas.width / 2) {
-                // When x is in the right half, the x_position is x it's self
-                // That is because x is between 0 and SOME_VALUE.
-                // We want applied_force_x to be proportional to the distance between ( current position ) and the side
-                // the ball is headed to.
-
-                // So, if we are in the right half, applied_force is going to be greatest when it's furthers to the
-                // right.
-
-                // When going the other way, we want applied_force_x to be greatest when furthers from the left.
-
-                x_position = x;
-            } else {
-                x_position = -1 * (this.canvas.width - x);
-            }
-
-            this.force_x = direction_value;
-            this.applied_force_x = (
-                x_position / this.canvas.width
-            ) * direction_value * this.force_modifier_x;
-
-            this.applied_force_y = (1 - (y / this.canvas.height)) * this.force_modifier_y;
-        }
-    }
-};
-
-Board.prototype.click_handler = function (event) {
-    if (!this.spawned) {
-        this.spawn(event.pageX, event.pageY);
-    }
-};
-
-Board.prototype.mouse_move_handler = function (event) {
-    // We drag if we are already dragging of if we start the dragging by clicking inside the ball.
-    if (
-        this.dragged || ( event.buttons == 1 && in_ball(
-            this.current_ball_position_x, this.current_ball_position_y, this.ball_radius, event.pageX, event.pageY
-            )
-        )
-    ) {
-        this.dragged = true;
-        this.drag(event.movementX, event.movementY);
-    } else {
-        this.drag_stop(event.pageX, event.pageY);
-    }
-};
-
-Board.prototype.mouse_up_handler = function (event) {
-    this.drag_stop(event.pageX, event.pageY);
 };
 /* End Handler section */
 
-Board.prototype.gravity = function () {
-    this.current_ball_position_y += this.gravitational_acceleration;
+Ball.prototype.gravity = function () {
+    this.current_ball_position_y += gravitational_acceleration;
 };
 
-Board.prototype.bounce = function () {
+Ball.prototype.bounce = function (other_balls) {
     /* The reason we use ball_radius, for example */
-    /* this.current_ball_position_x = this.ball_radius; */
+    /* this.current_ball_position_x = ball_radius; */
     /* Is because current_ball_position_x refers to the center of the ball. When we hit, in this example */
     /*
         The left side, we want to reposition the ball a radius away, so it appears as if the side of the ball is stopped
     */
 
-    let width_limit = this.canvas.width - this.ball_radius;
-    let height_limit = this.canvas.height - this.ball_radius;
+    let self = this;
+    let width_limit = this.canvas.width - ball_radius;
+    let height_limit = this.canvas.height - ball_radius;
 
     /* Width */
-    if (this.current_ball_position_x - this.ball_radius < 0) {
+    if (this.current_ball_position_x - ball_radius < 0) {
         /* Left side */
-        this.current_ball_position_x = this.ball_radius;
+        this.current_ball_position_x = ball_radius;
 
         // We want to 'bounce' left with a force equal to the currently applied force.
         this.force_x = this.applied_force_x;
         // Every time we apply the force, we decrease it a little bit.
         this.applied_force_x /= 1.2;
     }
-    if (this.current_ball_position_x + this.ball_radius > width_limit) {
+    if (this.current_ball_position_x + ball_radius > width_limit) {
         /* Right side */
         this.current_ball_position_x = width_limit;
         this.force_x = -this.applied_force_x; // We want to 'bounce' right
@@ -161,9 +82,9 @@ Board.prototype.bounce = function () {
     }
 
     /* Height */
-    if (this.current_ball_position_y - this.ball_radius < 0) {
+    if (this.current_ball_position_y - ball_radius < 0) {
         /* Top side */
-        this.current_ball_position_y = this.ball_radius;
+        this.current_ball_position_y = ball_radius;
         this.force_y = this.applied_force_y; // We want to bounce 'down'
         this.applied_force_y /= 1.2;
     }
@@ -172,6 +93,19 @@ Board.prototype.bounce = function () {
         this.current_ball_position_y = height_limit;
         this.force_y = -this.applied_force_y; // We want to bounce 'up'
         this.applied_force_y /= 1.2;
+    }
+
+    if (other_balls) {
+        other_balls.map(function (other_ball) {
+            if (self.ball_id !== other_ball.ball_id && circles_intersect(
+                    self.current_ball_position_x, self.current_ball_position_y,
+                    other_ball.current_ball_position_x, other_ball.current_ball_position_y
+                )
+            ) {
+                self.force_x = [-1, 1][Math.floor(Math.random() * 2)] * (Math.random() * 25 + 10);
+                self.applied_force_y = (1 - (self.current_ball_position_y / self.canvas.height)) * Math.random() * 50 + 25;
+            }
+        });
     }
 
     /* Force stop */
@@ -184,7 +118,7 @@ Board.prototype.bounce = function () {
     }
 };
 
-Board.prototype.apply_forces = function () {
+Ball.prototype.apply_forces = function () {
     /*
         In this function, we 'apply' the forces to the directions, x and y.
         We apply the force and then decrease it, no we don't apply it forever.
@@ -211,6 +145,21 @@ Board.prototype.apply_forces = function () {
         }
     }
 };
+/* ----- # ----- # ----- # ----- */
+
+/* ----- # ----- # ----- # ----- */
+/* Board Class */
+/* ----- # ----- # ----- # ----- */
+
+/* Board class - holds information about the ball and the canvas where it is drawn */
+function Board() {
+    /* Canvas and context */
+    this.canvas = null;
+    this.context = null;
+
+    /* Balls */
+    this.balls = []
+}
 
 /* Start Rendering section */
 Board.prototype.clear_canvas = function () {
@@ -221,7 +170,9 @@ Board.prototype.clear_canvas = function () {
 
 Board.prototype.render_canvas = function () {
     /* There is not point in re rendering when nothing is spawned or nothing is dragged */
-    if (this.spawned || this.dragged) {
+    let self = this;
+
+    this.balls.map(function (ball) {
         /*
             This says something like this.
             Consider the point (current_ball_position_x, current_ball_position_y) the center of a circle with radius
@@ -229,15 +180,15 @@ Board.prototype.render_canvas = function () {
             Draw the contour of that circle starting at 0 radians ( where sin(x) = 0 and cos(x) = 1 ) and end
             after 2PI radians ( same place, so a full circle )
         */
-        this.context.beginPath();
-        this.context.arc(
-            this.current_ball_position_x, this.current_ball_position_y,
-            this.ball_radius,
-            this.ball_start_angle, this.ball_end_angle
+        self.context.beginPath();
+        self.context.arc(
+            ball.current_ball_position_x, ball.current_ball_position_y,
+            ball_radius,
+            ball_start_angle, ball_end_angle
         );
 
-        this.context.stroke();
-    }
+        self.context.stroke();
+    })
 };
 
 Board.prototype.render = function () {
@@ -248,17 +199,28 @@ Board.prototype.render = function () {
 /* End Rendering section */
 
 Board.prototype.behave = function () {
-    if (this.spawned && !this.dragged) {
-        this.gravity();
-        this.bounce();
-        this.apply_forces();
-    }
+    let self = this;
+
+    this.balls.map(function (ball) {
+        ball.gravity();
+        ball.bounce(self.balls);
+        ball.apply_forces();
+    });
 
     this.render();
 };
 
+Board.prototype.click_handler = function (event) {
+    let new_ball = new Ball();
+    new_ball.ball_id = (+ new Date()).toString();
+    new_ball.canvas = this.canvas;
+    new_ball.spawn(event.pageX, event.pageY);
+
+    this.balls.push(new_ball);
+};
+
 /* Functions */
-function create_canvas(document, id="bounce_canvas") {
+function create_canvas(id="bounce_canvas") {
     let new_canvas = document.createElement("canvas");
 
     new_canvas.setAttribute("id", id);
@@ -269,7 +231,7 @@ function create_canvas(document, id="bounce_canvas") {
     return new_canvas;
 }
 
-function _set_canvas_size(document, canvas_id) {
+function _set_canvas_size(canvas_id) {
     return function () {
         let canvas = document.getElementById(canvas_id);
         let canvas_width = window.innerWidth - 50;
@@ -280,15 +242,18 @@ function _set_canvas_size(document, canvas_id) {
     }
 }
 
-function in_ball(circle_x, circle_y, circle_radius, point_x, point_y) {
-    let point_position = Math.pow(
-        point_x - circle_x, 2
-    ) + Math.pow(
-        point_y - circle_y, 2
-    );
-    return point_position < Math.pow(circle_radius, 2)
+function circles_intersect(circle_a_x, circle_a_y, circle_b_x, circle_b_y) {
+    let circle_point = Math.pow((circle_a_x - circle_b_x), 2) + Math.pow((circle_a_y - circle_b_y), 2);
+
+    if (circle_point < 0) {
+        return false;
+    } else if (circle_point > Math.pow(2 * ball_radius, 2)) {
+        return false;
+    }
+
+    return true;
 }
 
 module.exports = {
-    Board, create_canvas, _set_canvas_size, in_ball
-}
+    Board, Ball, create_canvas, _set_canvas_size, circles_intersect
+};

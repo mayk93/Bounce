@@ -8,8 +8,11 @@ let ball_start_angle = 0;
 let ball_end_angle = 2 * Math.PI;
 let gravitational_acceleration = 9.75;
 
+/* ----- # ----- # ----- # ----- */
+/* Ball Class */
+/* ----- # ----- # ----- # ----- */
 function Ball() {
-    self.ball_id = null;
+    this.ball_id = null;
 
     this.current_ball_position_x = null;
     this.current_ball_position_y = null;
@@ -20,8 +23,6 @@ function Ball() {
 
     this.force_x = 0;
     this.force_y = 0;
-
-    this.direction = [];
 
     this.canvas = null;
 }
@@ -86,17 +87,18 @@ Ball.prototype.bounce = function (other_balls) {
         this.applied_force_y /= 1.2;
     }
 
-    other_balls.map(function (other_ball) {
-        if (self.ball_id !== other_ball.ball_id && circles_intersect(
-                self.current_ball_position_x, self.current_ball_position_y,
-                other_ball.current_ball_position_x, other_ball.current_ball_position_y
-            )
-        ) {
-            //console.log('Circle intersection between ', self.ball_id, " and ", other_ball.ball_id)
-            self.force_x = [-1, 1][Math.floor(Math.random() * 2)] * (Math.random() * 25 + 10);
-            self.applied_force_y = (1 - (self.current_ball_position_y / self.canvas.height)) * Math.random() * 50 + 25;
-        }
-    });
+    if (other_balls) {
+        other_balls.map(function (other_ball) {
+            if (self.ball_id !== other_ball.ball_id && circles_intersect(
+                    self.current_ball_position_x, self.current_ball_position_y,
+                    other_ball.current_ball_position_x, other_ball.current_ball_position_y
+                )
+            ) {
+                self.force_x = [-1, 1][Math.floor(Math.random() * 2)] * (Math.random() * 25 + 10);
+                self.applied_force_y = (1 - (self.current_ball_position_y / self.canvas.height)) * Math.random() * 50 + 25;
+            }
+        });
+    }
 
     /* Force stop */
     /* In order to avoid perpetual bounce, we just set the applied force to zero once it gets too small. */
@@ -135,7 +137,10 @@ Ball.prototype.apply_forces = function () {
         }
     }
 };
+/* ----- # ----- # ----- # ----- */
 
+/* ----- # ----- # ----- # ----- */
+/* Board Class */
 /* ----- # ----- # ----- # ----- */
 
 /* Board class - holds information about the ball and the canvas where it is drawn */
@@ -208,6 +213,8 @@ Board.prototype.click_handler = function (event) {
 
 /* Functions */
 function create_canvas(id="bounce_canvas") {
+    // console.log("Creating canvas with id: ", id)
+
     let new_canvas = document.createElement("canvas");
 
     new_canvas.setAttribute("id", id);
@@ -220,6 +227,8 @@ function create_canvas(id="bounce_canvas") {
 
 function _set_canvas_size(canvas_id) {
     return function () {
+        // console.log('Executing set size with id ', canvas_id)
+
         let canvas = document.getElementById(canvas_id);
         let canvas_width = window.innerWidth - 50;
         let canvas_height = window.innerHeight - 50;
@@ -232,9 +241,6 @@ function _set_canvas_size(canvas_id) {
 function circles_intersect(circle_a_x, circle_a_y, circle_b_x, circle_b_y) {
     let circle_point = Math.pow((circle_a_x - circle_b_x), 2) + Math.pow((circle_a_y - circle_b_y), 2);
 
-    // console.log('Circles: ', circle_a_x, circle_a_y, circle_b_x, circle_b_y)
-    // console.log('CP: ', circle_point)
-
     if (circle_point < 0) {
         return false;
     } else if (circle_point > Math.pow(2 * ball_radius, 2)) {
@@ -242,8 +248,4 @@ function circles_intersect(circle_a_x, circle_a_y, circle_b_x, circle_b_y) {
     }
 
     return true;
-
-    // return (
-    //     0 <= circle_point <= Math.pow(2 * ball_radius, 2)
-    // )
 }

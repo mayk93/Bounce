@@ -2,6 +2,8 @@
  * Created by michael on 05/02/2018.
  */
 
+let test_bounce_canvas_id = "test_bounce_canvas";
+
 describe("Canvas Creation", function () {
     let main;
     let canvas;
@@ -9,7 +11,14 @@ describe("Canvas Creation", function () {
     beforeEach(function () {
         /* Delete the canvas if it exists */
         main = document.getElementById("main");
-        canvas = document.getElementById("test_bounce_canvas");
+        canvas = document.getElementById(test_bounce_canvas_id);
+        if (canvas) {
+            canvas.parentNode.removeChild(canvas);
+        }
+    });
+
+    afterEach(function () {
+        canvas = document.getElementById(test_bounce_canvas_id);
         if (canvas) {
             canvas.parentNode.removeChild(canvas);
         }
@@ -18,14 +27,14 @@ describe("Canvas Creation", function () {
     it("should not have a canvas", function () {
         /* We check specifically for test_bounce_canvas */
         expect(main.childNodes.length).toEqual(1);
-        expect(main.childNodes[0].id).not.toEqual("test_bounce_canvas");
-        expect(document.getElementById("test_bounce_canvas")).toBeNull();
+        expect(main.childNodes[0].id).not.toEqual(test_bounce_canvas_id);
+        expect(document.getElementById(test_bounce_canvas_id)).toBeNull();
     });
 
     it("should have a canvas child after initialization", function () {
-        create_canvas("test_bounce_canvas");
+        create_canvas(test_bounce_canvas_id);
         expect(main.childNodes.length).toEqual(2);
-        expect(document.getElementById("test_bounce_canvas")).toBeDefined();
+        expect(document.getElementById(test_bounce_canvas_id)).toBeDefined();
     })
 });
 
@@ -36,17 +45,25 @@ describe("Canvas size", function () {
     beforeEach(function () {
         /* Delete the canvas if it exists and create it again. */
         main = document.getElementById("main");
-        canvas = document.getElementById("test_bounce_canvas");
+        canvas = document.getElementById(test_bounce_canvas_id);
         if (canvas) {
             canvas.parentNode.removeChild(canvas);
-            create_canvas("test_bounce_canvas");
-            canvas = document.getElementById("test_bounce_canvas");
+            create_canvas(test_bounce_canvas_id);
+            canvas = document.getElementById(test_bounce_canvas_id);
+        } else {
+            canvas = create_canvas(test_bounce_canvas_id);
+        }
+    });
+
+    afterEach(function () {
+        canvas = document.getElementById(test_bounce_canvas_id);
+        if (canvas) {
+            canvas.parentNode.removeChild(canvas);
         }
     });
 
     it("should return a function based on the id we give it", function () {
-        let canvas_id = "test_bounce_canvas";
-        let canvas_size_function = _set_canvas_size(canvas_id);
+        let canvas_size_function = _set_canvas_size(test_bounce_canvas_id);
 
         expect(canvas_size_function).toBeDefined();
         expect(typeof canvas_size_function).toEqual("function");
@@ -56,9 +73,7 @@ describe("Canvas size", function () {
         // We run the function and check to see those attributes have been added.
         // Since create_canvas does not set size, we know those must have been set by canvas_size_function
 
-        let canvas_id = "test_bounce_canvas";
-        let canvas_size_function = _set_canvas_size(canvas_id);
-
+        let canvas_size_function = _set_canvas_size(test_bounce_canvas_id);
         canvas_size_function();
 
         expect(canvas.width).toBeDefined();
@@ -66,53 +81,76 @@ describe("Canvas size", function () {
     });
 });
 
-describe("Board", function () {
-    let board;
+describe("Ball", function () {
+    let ball;
+    let main;
     let canvas;
 
     beforeEach(function () {
-        board = new Board();
-        canvas = document.getElementById("test_bounce_canvas");
+        ball = new Ball();
+        main = document.getElementById("main");
+        canvas = document.getElementById(test_bounce_canvas_id);
         if (canvas) {
             canvas.parentNode.removeChild(canvas);
+            create_canvas(test_bounce_canvas_id);
+            canvas = document.getElementById(test_bounce_canvas_id);
         }
     });
 
     afterEach(function () {
-        canvas = document.getElementById("test_bounce_canvas");
+        canvas = document.getElementById(test_bounce_canvas_id);
         if (canvas) {
             canvas.parentNode.removeChild(canvas);
         }
     });
 
     it("should be in a uninitialized state", function () {
-        expect(board.spawned).toEqual(false);
-        expect(board.current_ball_position_x).toEqual(null);
-        expect(board.current_ball_position_y).toEqual(null);
-        expect(board.canvas).toEqual(null);
-        expect(board.context).toEqual(null);
+        expect(ball.ball_id).toEqual(null);
+        expect(ball.current_ball_position_x).toEqual(null);
+        expect(ball.current_ball_position_y).toEqual(null);
+        expect(ball.canvas).toEqual(null);
     });
 
     it("should be aware of the canvas and context once create canvas is set", function () {
-        expect(board.canvas).toEqual(null);
-        expect(board.context).toEqual(null);
+        expect(ball.canvas).toEqual(null);
 
-        board.canvas = create_canvas("test_bounce_canvas");
-        board.context = board.canvas.getContext("2d");
+        ball.canvas = create_canvas(test_bounce_canvas_id);
 
-        expect(board.canvas).not.toBeNull();
-        expect(board.context).not.toBeNull();
+        expect(ball.canvas).not.toBeNull();
     });
 
     it("should be able to spawn the ball", function () {
         let x = 10;
         let y = 20;
 
-        board.spawn(x, y);
+        ball.spawn(x, y);
 
-        expect(board.spawned).toEqual(true);
-        expect(board.current_ball_position_x).toEqual(x);
-        expect(board.current_ball_position_y).toEqual(y);
+        expect(ball.current_ball_position_x).toEqual(x);
+        expect(ball.current_ball_position_y).toEqual(y);
+    });
+});
+
+describe("Board", function () {
+    let board;
+    let main;
+    let canvas;
+
+    beforeEach(function () {
+        board = new Board();
+        main = document.getElementById("main");
+        canvas = document.getElementById(test_bounce_canvas_id);
+        if (canvas) {
+            canvas.parentNode.removeChild(canvas);
+            create_canvas(test_bounce_canvas_id);
+            canvas = document.getElementById(test_bounce_canvas_id);
+        }
+    });
+
+    afterEach(function () {
+        canvas = document.getElementById(test_bounce_canvas_id);
+        if (canvas) {
+            canvas.parentNode.removeChild(canvas);
+        }
     });
 
     /* Important note! */
@@ -144,17 +182,25 @@ describe("Board", function () {
         let x = 150;
         let y = 150;
 
+        let new_ball;
+
         expected_image.src = "tests/ball_expect.png";
 
-        board.canvas = create_canvas("test_bounce_canvas");
+        board.canvas = create_canvas(test_bounce_canvas_id);
         board.context = board.canvas.getContext("2d");
 
-        _set_canvas_size("test_bounce_canvas")();
+        _set_canvas_size(test_bounce_canvas_id)();
 
-        board.spawn(x, y);
+
+        new_ball = new Ball();
+        new_ball.ball_id = (+ new Date()).toString();
+        new_ball.canvas = board.canvas;
+        new_ball.spawn(x, y);
+
+        board.balls.push(new_ball);
         board.render_canvas();
 
-        actual_image_data = document.getElementById("test_bounce_canvas").toDataURL("img/png");
+        actual_image_data = document.getElementById(test_bounce_canvas_id).toDataURL("img/png");
         actual_image.src = actual_image_data;
 
         diff = imagediff.diff(
@@ -181,24 +227,28 @@ describe("Board", function () {
                 expect(point).toEqual(0);
             }
         })
-        
+
     });
 });
 
 describe("Mechanics", function () {
     let board;
+    let main;
     let canvas;
 
     beforeEach(function () {
         board = new Board();
-        canvas = document.getElementById("test_bounce_canvas");
+        main = document.getElementById("main");
+        canvas = document.getElementById(test_bounce_canvas_id);
         if (canvas) {
             canvas.parentNode.removeChild(canvas);
+            create_canvas(test_bounce_canvas_id);
+            canvas = document.getElementById(test_bounce_canvas_id);
         }
     });
 
     afterEach(function () {
-        canvas = document.getElementById("test_bounce_canvas");
+        canvas = document.getElementById(test_bounce_canvas_id);
         if (canvas) {
             canvas.parentNode.removeChild(canvas);
         }
@@ -209,48 +259,44 @@ describe("Mechanics", function () {
         let y = 20;
         let canvas_size_function;
 
-        board.spawn(x, y);
+        let new_ball;
 
-        board.canvas = create_canvas("test_bounce_canvas");
+        board.canvas = create_canvas(test_bounce_canvas_id);
         board.context = board.canvas.getContext("2d");
 
-        canvas_size_function = _set_canvas_size(board.canvas.id);
+        canvas_size_function = _set_canvas_size(test_bounce_canvas_id);
         canvas_size_function();
 
-        expect(board.current_ball_position_x).toEqual(10);
-        expect(board.current_ball_position_y).toEqual(20);
+        new_ball = new Ball();
+        new_ball.ball_id = (+ new Date()).toString();
+        new_ball.canvas = board.canvas;
+        new_ball.spawn(x, y);
+
+        board.balls.push(new_ball);
+
+        expect(board.balls[0].current_ball_position_x).toEqual(10);
+        expect(board.balls[0].current_ball_position_y).toEqual(20);
 
         /* Here, we 'try' to go over the border */
-        board.current_ball_position_x = board.canvas.width + 5000;
-        board.current_ball_position_y = board.canvas.height + 5000;
+        board.balls[0].current_ball_position_x = board.canvas.width + 5000;
+        board.balls[0].current_ball_position_y = board.canvas.height + 5000;
 
         board.applied_force_x = 100;
 
-        board.bounce();
+        board.balls[0].bounce();
 
         /*
             We expect the following after bouncing once with applied force 100:
 
             1. We expect the values of the ball, current_x, current_y to be reset to the maximum admissible values.
-
-            2. We expect the applied_force on x to have been reduced.
-
-            3. We expect force_x ( what apply_forces would actually apply ) to be the original applied_force_x,
-               except in negative, since we are hitting the right side.
         */
 
         /* 1 */
-        let expected_x = board.canvas.width - board.ball_radius;
-        let expected_y = board.canvas.height - board.ball_radius;
+        let expected_x = board.canvas.width - ball_radius;
+        let expected_y = board.canvas.height - ball_radius;
 
-        expect(board.current_ball_position_x).toEqual(expected_x);
-        expect(board.current_ball_position_y).toEqual(expected_y);
-
-        /* 2 */
-        expect(board.applied_force_x).toEqual(100 / 1.2);
-
-        /* 3 */
-        expect(board.force_x).toEqual(-100);
+        expect(board.balls[0].current_ball_position_x).toEqual(expected_x);
+        expect(board.balls[0].current_ball_position_y).toEqual(expected_y);
     });
 
     it("should bounce when hitting the bottom", function () {
@@ -258,44 +304,41 @@ describe("Mechanics", function () {
         let y = 20;
         let canvas_size_function;
 
-        board.spawn(x, y);
+        let new_ball;
 
-        board.canvas = create_canvas("test_bounce_canvas");
+        board.canvas = create_canvas(test_bounce_canvas_id);
         board.context = board.canvas.getContext("2d");
+
+        new_ball = new Ball();
+        new_ball.ball_id = (+ new Date()).toString();
+        new_ball.canvas = board.canvas;
+        new_ball.spawn(x, y);
+
+        board.balls.push(new_ball);
 
         canvas_size_function = _set_canvas_size(board.canvas.id);
         canvas_size_function();
 
-        expect(board.current_ball_position_x).toEqual(10);
-        expect(board.current_ball_position_y).toEqual(20);
+        expect(board.balls[0].current_ball_position_x).toEqual(10);
+        expect(board.balls[0].current_ball_position_y).toEqual(20);
 
-        /* Here, we 'try' to go over the bottom */
-        board.current_ball_position_y = board.canvas.height + 5000;
+        /* Here, we 'try' to go beneath the floor */
+        board.balls[0].current_ball_position_y = board.canvas.height + 5000;
 
-        board.applied_force_y = 150;
+        board.applied_force_y = 100;
 
-        board.bounce();
+        board.balls[0].bounce();
 
         /*
             We expect the following after bouncing once with applied force 100:
 
-            1. We expect the current_y value to be reset to the maximum admissible value.
-
-            2. We expect the applied_force on y to have been reduced.
-
-            3. We expect force_y to be the original applied_force_y, but negative.
+            1. We expect the values of the ball, current_x, current_y to be reset to the maximum admissible values.
         */
 
         /* 1 */
-        let expected_y = board.canvas.height - board.ball_radius;
+        let expected_y = board.canvas.height - ball_radius;
 
-        expect(board.current_ball_position_y).toEqual(expected_y);
-
-        /* 2 */
-        expect(board.applied_force_y).toEqual(150 / 1.2);
-
-        /* 3 */
-        expect(board.force_y).toEqual(-150);
+        expect(board.balls[0].current_ball_position_y).toEqual(expected_y);
     });
 });
 
@@ -305,17 +348,24 @@ describe("Functions", function () {
         1
         2     .
         3   . x .
-        4     .
-        5
+        4     . x .
+        5       .
         6
         7
         */
 
-    it("should be in the ball", function () {
-        expect(in_ball(3, 3, 1, 2.8, 2.4)).toEqual(true);
+    afterEach(function () {
+        let canvas = document.getElementById(test_bounce_canvas_id);
+        if (canvas) {
+            canvas.parentNode.removeChild(canvas);
+        }
     });
 
-    it("should not be in the ball", function () {
-        expect(in_ball(3, 3, 1, 21.8, 42.4)).toEqual(false);
+    it("should intersect", function () {
+        expect(circles_intersect(3, 3, 4, 4)).toEqual(true);
+    });
+
+    it("should not intersect", function () {
+        expect(circles_intersect(3, 3, 40, 40)).toEqual(true);
     });
 });
