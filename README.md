@@ -59,9 +59,14 @@ The class `Ball` is a representation of each individual ball. It keeps track of 
 the forces that are applied to it. It also keeps a id, used to ensure collisions are not counted 
 against it's self and a collision counter, to destroy balls that are stuck in a collision loop.
 
+I have also deployed the project on a amazon instance that I rent. The setup is rather simple, I use
+`nginx` to serve files and used `Let's Encrypt` in order to get `SSL` certificates.
+
 ---
 
 Deployment:
+
+A demo of the project can be seen on my [website](https://myapps.gallery/).
 
 ---
    
