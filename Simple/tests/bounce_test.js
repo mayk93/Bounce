@@ -204,10 +204,10 @@ describe("Mechanics", function () {
         }
     });
 
-    it("should stop when hitting the sides", function () {
+    it("should bounce when hitting the sides", function () {
         let x = 10;
         let y = 20;
-        let canvas_size_function
+        let canvas_size_function;
 
         board.spawn(x, y);
 
@@ -221,14 +221,81 @@ describe("Mechanics", function () {
         expect(board.current_ball_position_y).toEqual(20);
 
         /* Here, we 'try' to go over the border */
-        board.current_ball_position_x = board.canvas.width + 100;
-        board.current_ball_position_y = board.canvas.height + 100;
+        board.current_ball_position_x = board.canvas.width + 5000;
+        board.current_ball_position_y = board.canvas.height + 5000;
+
+        board.applied_force_x = 100;
 
         board.bounce();
 
-        /* Here, we make sure those values are reset */
-        expect(board.current_ball_position_x).toEqual(board.current_ball_position_x);
-        expect(board.current_ball_position_y).toEqual(board.current_ball_position_y);
+        /*
+            We expect the following after bouncing once with applied force 100:
+
+            1. We expect the values of the ball, current_x, current_y to be reset to the maximum admissible values.
+
+            2. We expect the applied_force on x to have been reduced.
+
+            3. We expect force_x ( what apply_forces would actually apply ) to be the original applied_force_x,
+               except in negative, since we are hitting the right side.
+        */
+
+        /* 1 */
+        let expected_x = board.canvas.width - board.ball_radius;
+        let expected_y = board.canvas.height - board.ball_radius;
+
+        expect(board.current_ball_position_x).toEqual(expected_x);
+        expect(board.current_ball_position_y).toEqual(expected_y);
+
+        /* 2 */
+        expect(board.applied_force_x).toEqual(100 / 1.2);
+
+        /* 3 */
+        expect(board.force_x).toEqual(-100);
+    });
+
+    it("should bounce when hitting the bottom", function () {
+        let x = 10;
+        let y = 20;
+        let canvas_size_function;
+
+        board.spawn(x, y);
+
+        board.canvas = create_canvas("test_bounce_canvas");
+        board.context = board.canvas.getContext("2d");
+
+        canvas_size_function = _set_canvas_size(board.canvas.id);
+        canvas_size_function();
+
+        expect(board.current_ball_position_x).toEqual(10);
+        expect(board.current_ball_position_y).toEqual(20);
+
+        /* Here, we 'try' to go over the bottom */
+        board.current_ball_position_y = board.canvas.height + 5000;
+
+        board.applied_force_y = 150;
+
+        board.bounce();
+
+        /*
+            We expect the following after bouncing once with applied force 100:
+
+            1. We expect the current_y value to be reset to the maximum admissible value.
+
+            2. We expect the applied_force on y to have been reduced.
+
+            3. We expect force_y to be the original applied_force_y, but negative.
+        */
+
+        /* 1 */
+        let expected_y = board.canvas.height - board.ball_radius;
+
+        expect(board.current_ball_position_y).toEqual(expected_y);
+
+        /* 2 */
+        expect(board.applied_force_y).toEqual(150 / 1.2);
+
+        /* 3 */
+        expect(board.force_y).toEqual(-150);
     });
 });
 
@@ -250,5 +317,5 @@ describe("Functions", function () {
 
     it("should not be in the ball", function () {
         expect(in_ball(3, 3, 1, 21.8, 42.4)).toEqual(false);
-    })
+    });
 });
