@@ -21,6 +21,7 @@ let gravitational_acceleration = 9.75;
 /* ----- # ----- # ----- # ----- */
 function Ball() {
     this.ball_id = null;
+    this.collisions = 0;
 
     this.current_ball_position_x = null;
     this.current_ball_position_y = null;
@@ -102,6 +103,8 @@ Ball.prototype.bounce = function (other_balls) {
                     other_ball.current_ball_position_x, other_ball.current_ball_position_y
                 )
             ) {
+                self.collisions += 1;
+
                 self.force_x = [-1, 1][Math.floor(Math.random() * 2)] * (Math.random() * 25 + 10);
                 self.applied_force_y = (1 - (self.current_ball_position_y / self.canvas.height)) * Math.random() * 50 + 25;
             }
@@ -202,9 +205,19 @@ Board.prototype.behave = function () {
     let self = this;
 
     this.balls.map(function (ball) {
-        ball.gravity();
-        ball.bounce(self.balls);
-        ball.apply_forces();
+        if (ball.collisions > 100) {
+            ball = null;
+        }
+
+        if (ball) {
+            ball.gravity();
+            ball.bounce(self.balls);
+            ball.apply_forces();
+        }
+    });
+
+    this.balls = this.balls.filter(function (ball) {
+        return ball !== null && ball.collisions < 100;
     });
 
     this.render();
