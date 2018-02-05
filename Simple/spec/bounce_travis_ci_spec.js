@@ -3,7 +3,12 @@
  */
 
 const bounce = require("../bounce_lib");
-const { Ball, _set_canvas_size, circles_intersect } = bounce;
+
+// THis fails on Travis
+// const { Ball, _set_canvas_size, circles_intersect } = bounce;
+let Ball = bounce.Ball;
+let _set_canvas_size = bounce._set_canvas_size;
+let circles_intersect = bounce.circles_intersect;
 
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
