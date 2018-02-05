@@ -1,6 +1,14 @@
 /**
  * Created by michael on 05/02/2018.
  */
+/**
+ * Created by michael on 05/02/2018.
+ */
+
+const window = {
+    innerWidth: 1000,
+    innerHeight: 1000
+}
 
 /* Board class - holds information about the ball and the canvas where it is drawn */
 function Board() {
@@ -250,7 +258,7 @@ Board.prototype.behave = function () {
 };
 
 /* Functions */
-function create_canvas(id="bounce_canvas") {
+function create_canvas(document, id="bounce_canvas") {
     let new_canvas = document.createElement("canvas");
 
     new_canvas.setAttribute("id", id);
@@ -261,7 +269,7 @@ function create_canvas(id="bounce_canvas") {
     return new_canvas;
 }
 
-function _set_canvas_size(canvas_id) {
+function _set_canvas_size(document, canvas_id) {
     return function () {
         let canvas = document.getElementById(canvas_id);
         let canvas_width = window.innerWidth - 50;
@@ -279,4 +287,8 @@ function in_ball(circle_x, circle_y, circle_radius, point_x, point_y) {
         point_y - circle_y, 2
     );
     return point_position < Math.pow(circle_radius, 2)
+}
+
+module.exports = {
+    Board, create_canvas, _set_canvas_size, in_ball
 }

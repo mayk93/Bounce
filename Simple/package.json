@@ -1,0 +1,29 @@
+{
+  "name": "simple_bounce",
+  "version": "1.0.0",
+  "description": "A simple page where you can bounce a ball around, made using JS and HTML5 canvas.",
+  "main": "bounce.js",
+  "directories": {
+    "lib": "lib",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "jasmine"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/mayk93/Bounce.git"
+  },
+  "author": "Michael",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mayk93/Bounce/issues"
+  },
+  "homepage": "https://github.com/mayk93/Bounce#readme",
+  "devDependencies": {
+    "jasmine": "^2.9.0"
+  },
+  "dependencies": {
+    "jsdom": "^11.6.2"
+  }
+}
