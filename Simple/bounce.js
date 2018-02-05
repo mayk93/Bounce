@@ -4,6 +4,9 @@
 
 /* Board class - holds information about the ball and the canvas where it is drawn */
 function Board() {
+    this.canvas = null;
+    this.context = null;
+
     this.spawned = false;
     this.current_ball_position_x = null;
     this.current_ball_position_y = null;
@@ -22,12 +25,29 @@ function create_canvas() {
     new_canvas.setAttribute("class", "canvas_class");
 
     document.getElementById("main").appendChild(new_canvas);
+
+    return new_canvas;
+}
+
+function _set_canvas_size(canvas_id) {
+    return function () {
+        let canvas = document.getElementById(canvas_id);
+        let canvas_width = window.innerWidth - 50;
+        let canvas_height = window.innerHeight - 50;
+
+        canvas.setAttribute("width", canvas_width);
+        canvas.setAttribute("height", canvas_height);
+    }
 }
 
 function main() {
-    create_canvas();
-
     let board = new Board();
+    let set_canvas_size;
+
+    board.canvas = create_canvas();
+    set_canvas_size = _set_canvas_size(board.canvas.id);
+    set_canvas_size();
+    window.onresize = set_canvas_size;
 }
 
 if (document.addEventListener) {

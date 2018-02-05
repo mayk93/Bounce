@@ -14,7 +14,7 @@ describe("Canvas Creation", function () {
             canvas.parentNode.removeChild(canvas);
         }
     });
-    
+
     it("should not have a canvas", function () {
         /* If it has no children, it has no canvas child */
         expect(main.childNodes.length).toEqual(0);
@@ -26,6 +26,43 @@ describe("Canvas Creation", function () {
         expect(main.childNodes.length).toEqual(1);
         expect(document.getElementById("bounce_canvas")).toBeDefined(null);
     })
+});
+
+describe("Canvas size", function () {
+    let main;
+    let canvas;
+
+    beforeEach(function () {
+        /* Delete the canvas if it exists and create it again. */
+        main = document.getElementById("main");
+        canvas = document.getElementById("bounce_canvas");
+        if (canvas) {
+            canvas.parentNode.removeChild(canvas);
+            create_canvas();
+            canvas = document.getElementById("bounce_canvas");
+        }
+    });
+
+    it("should return a function based on the id we give it", function () {
+        let canvas_id = "bounce_canvas";
+        let canvas_size_function = _set_canvas_size(canvas_id);
+
+        expect(canvas_size_function).toBeDefined();
+        expect(typeof canvas_size_function).toEqual("function");
+    });
+
+    it("should set the size of the canvas", function () {
+        // We run the function and check to see those attributes have been added.
+        // Since create_canvas does not set size, we know those must have been set by canvas_size_function
+
+        let canvas_id = "bounce_canvas";
+        let canvas_size_function = _set_canvas_size(canvas_id);
+
+        canvas_size_function();
+
+        expect(canvas.width).toBeDefined();
+        expect(canvas.height).toBeDefined();
+    });
 });
 
 describe("Bounce", function () {
