@@ -1,3 +1,5 @@
 language: node_js
-before_success:
+before_install:
+  - echo $(pwd)
   - cd Simple
+  - echo $(pwd)
