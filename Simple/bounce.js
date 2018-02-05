@@ -21,13 +21,15 @@ function Board() {
     this.force_x = 0;
     this.force_y = 0;
 
+    this.direction = [];
+
     /* Constants */
     this.ball_radius = 50;
     this.ball_start_angle = 0;
     this.ball_end_angle = 2 * Math.PI;
     this.gravitational_acceleration = 9.75;
 
-    this.force_modifier_x = 50;
+    this.force_modifier_x = 2;
     this.force_modifier_y = 50;
 }
 
@@ -46,6 +48,11 @@ Board.prototype.spawn = function (x, y) {
 Board.prototype.drag = function (x, y) {
     this.current_ball_position_x += x;
     this.current_ball_position_y += y;
+
+    this.direction.push(event.x);
+    if (this.direction.length > 2) {
+        this.direction.shift();
+    }
 };
 
 Board.prototype.drag_stop = function (x, y) {
@@ -54,6 +61,34 @@ Board.prototype.drag_stop = function (x, y) {
 
         /* When we stop dragging the ball, we drop it, thus we need to apply a little force to it. */
         if (this.canvas) {
+            let x_position;
+            let direction_value = 0;
+
+            if (this.direction.length == 2) {
+                direction_value = this.direction[1] - this.direction[0];
+            }
+
+            if (x > this.canvas.width / 2) {
+                // When x is in the right half, the x_position is x it's self
+                // That is because x is between 0 and SOME_VALUE.
+                // We want applied_force_x to be proportional to the distance between ( current position ) and the side
+                // the ball is headed to.
+
+                // So, if we are in the right half, applied_force is going to be greatest when it's furthers to the
+                // right.
+
+                // When going the other way, we want applied_force_x to be greatest when furthers from the left.
+
+                x_position = x;
+            } else {
+                x_position = -1 * (this.canvas.width - x);
+            }
+
+            this.force_x = direction_value;
+            this.applied_force_x = (
+                x_position / this.canvas.width
+            ) * direction_value * this.force_modifier_x;
+
             this.applied_force_y = (1 - (y / this.canvas.height)) * this.force_modifier_y;
         }
     }
