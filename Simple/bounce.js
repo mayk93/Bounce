@@ -9,6 +9,8 @@ function Board() {
     this.context = null;
 
     this.spawned = false;
+    this.dragged = false;
+
     this.current_ball_position_x = null;
     this.current_ball_position_y = null;
 
@@ -16,12 +18,56 @@ function Board() {
     this.ball_radius = 50;
     this.ball_start_angle = 0;
     this.ball_end_angle = 2 * Math.PI;
+    this.gravitational_acceleration = 9.75;
 }
 
 Board.prototype.spawn = function (x, y) {
     this.spawned = true;
     this.current_ball_position_x = x;
     this.current_ball_position_y = y;
+};
+
+Board.prototype.click_handler = function (event) {
+    if (!this.spawned) {
+        this.spawned = true;
+        this.spawn(event.pageX, event.pageY);
+    }
+};
+
+Board.prototype.gravity = function () {
+    this.current_ball_position_y += this.gravitational_acceleration;
+};
+
+Board.prototype.bounce = function () {
+    /* The reason we use ball_radius, for example */
+    /* this.current_ball_position_x = this.ball_radius; */
+    /* Is because current_ball_position_x refers to the center of the ball. When we hit, in this example */
+    /*
+        The left side, we want to reposition the ball a radius away, so it appears as if the side of the ball is stopped
+    */
+
+    let width_limit = this.canvas.width - this.ball_radius;
+    let height_limit = this.canvas.height - this.ball_radius;
+
+    /* Width */
+    if (this.current_ball_position_x - this.ball_radius < 0) {
+        /* Left side */
+        this.current_ball_position_x = this.ball_radius;
+    }
+    if (this.current_ball_position_x + this.ball_radius > width_limit) {
+        /* Right side */
+        this.current_ball_position_x = width_limit
+    }
+
+    /* Height */
+    if (this.current_ball_position_y - this.ball_radius < 0) {
+        /* Top side */
+        this.current_ball_position_y = this.ball_radius;
+    }
+    if (this.current_ball_position_y > height_limit) {
+        /* Bottom side */
+        this.current_ball_position_y = height_limit
+    }
 };
 
 Board.prototype.clear_canvas = function () {
@@ -57,7 +103,15 @@ Board.prototype.render = function () {
     this.render_canvas();
 };
 
-Board.prototype.behave = function () {};
+Board.prototype.behave = function () {
+    if (this.spawned && !this.dragged) {
+        this.gravity();
+        this.bounce();
+        // this.apply_forces();
+
+        this.render();
+    }
+};
 
 /* Functions */
 function create_canvas(id="bounce_canvas") {
@@ -88,13 +142,15 @@ function main() {
     let render_interval = 10;
 
     board.canvas = create_canvas();
-    board.context = board.canvas.getContext("2D");
+    board.context = board.canvas.getContext("2d");
+
+    board.canvas.addEventListener("click", board.click_handler.bind(board));
 
     set_canvas_size = _set_canvas_size(board.canvas.id);
     set_canvas_size();
     window.onresize = set_canvas_size;
 
-    setInterval(board.behave, render_interval);
+    setInterval(board.behave.bind(board), render_interval);
 }
 
 if (document.addEventListener) {

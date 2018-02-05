@@ -66,7 +66,7 @@ describe("Canvas size", function () {
     });
 });
 
-describe("Bounce", function () {
+describe("Board", function () {
     let board;
     let canvas;
 
@@ -149,9 +149,6 @@ describe("Bounce", function () {
         board.canvas = create_canvas("test_bounce_canvas");
         board.context = board.canvas.getContext("2d");
 
-        // board.canvas.style.width = board.canvas.width;
-        // board.canvas.style.height = board.canvas.height;
-
         _set_canvas_size("test_bounce_canvas")();
 
         board.spawn(x, y);
@@ -185,5 +182,52 @@ describe("Bounce", function () {
             }
         })
         
+    });
+});
+
+describe("Mechanics", function () {
+    let board;
+    let canvas;
+
+    beforeEach(function () {
+        board = new Board();
+        canvas = document.getElementById("test_bounce_canvas");
+        if (canvas) {
+            canvas.parentNode.removeChild(canvas);
+        }
+    });
+
+    afterEach(function () {
+        canvas = document.getElementById("test_bounce_canvas");
+        if (canvas) {
+            canvas.parentNode.removeChild(canvas);
+        }
+    });
+
+    it("should stop when hitting the sides", function () {
+        let x = 10;
+        let y = 20;
+        let canvas_size_function
+
+        board.spawn(x, y);
+
+        board.canvas = create_canvas("test_bounce_canvas");
+        board.context = board.canvas.getContext("2d");
+
+        canvas_size_function = _set_canvas_size(board.canvas.id);
+        canvas_size_function();
+
+        expect(board.current_ball_position_x).toEqual(10);
+        expect(board.current_ball_position_y).toEqual(20);
+
+        /* Here, we 'try' to go over the border */
+        board.current_ball_position_x = board.canvas.width + 100;
+        board.current_ball_position_y = board.canvas.height + 100;
+
+        board.bounce();
+
+        /* Here, we make sure those values are reset */
+        expect(board.current_ball_position_x).toEqual(board.current_ball_position_x);
+        expect(board.current_ball_position_y).toEqual(board.current_ball_position_y);
     });
 });
