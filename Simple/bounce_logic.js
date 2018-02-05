@@ -12,8 +12,8 @@ function main() {
     board.context = board.canvas.getContext("2d");
 
     board.canvas.addEventListener("click", board.click_handler.bind(board));
-    board.canvas.addEventListener("mousemove", board.mouse_move_handler.bind(board));
-    window.addEventListener("mouseup", board.mouse_up_handler.bind(board));
+    // board.canvas.addEventListener("mousemove", board.mouse_move_handler.bind(board));
+    // window.addEventListener("mouseup", board.mouse_up_handler.bind(board));
 
     set_canvas_size = _set_canvas_size(board.canvas.id);
     set_canvas_size();
