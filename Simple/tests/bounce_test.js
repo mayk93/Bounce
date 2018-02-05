@@ -231,3 +231,24 @@ describe("Mechanics", function () {
         expect(board.current_ball_position_y).toEqual(board.current_ball_position_y);
     });
 });
+
+describe("Functions", function () {
+        /*
+        0 1 2 3 4 5 6 7
+        1
+        2     .
+        3   . x .
+        4     .
+        5
+        6
+        7
+        */
+
+    it("should be in the ball", function () {
+        expect(in_ball(3, 3, 1, 2.8, 2.4)).toEqual(true);
+    });
+
+    it("should not be in the ball", function () {
+        expect(in_ball(3, 3, 1, 21.8, 42.4)).toEqual(false);
+    })
+});

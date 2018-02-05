@@ -27,11 +27,34 @@ Board.prototype.spawn = function (x, y) {
     this.current_ball_position_y = y;
 };
 
+Board.prototype.drag = function (x, y) {
+    this.current_ball_position_x += x;
+    this.current_ball_position_y += y;
+};
+
+Board.prototype.drag_stop = function () {
+    this.dragged = false;
+};
+
 Board.prototype.click_handler = function (event) {
     if (!this.spawned) {
-        this.spawned = true;
         this.spawn(event.pageX, event.pageY);
     }
+};
+
+Board.prototype.mouse_move_handler = function (event) {
+    if (event.buttons == 1 && in_ball(
+        this.current_ball_position_x, this.current_ball_position_y, this.ball_radius, event.pageX, event.pageY)
+    ) {
+        this.dragged = true;
+        this.drag(event.movementX, event.movementY);
+    } else {
+        this.drag_stop(event.pageX, event.pageY);
+    }
+};
+
+Board.prototype.mouse_up_handler = function (event) {
+    this.drag(event.pageX, event.pageY);
 };
 
 Board.prototype.gravity = function () {
@@ -70,6 +93,8 @@ Board.prototype.bounce = function () {
     }
 };
 
+Board.prototype.apply_forces = function () {};
+
 Board.prototype.clear_canvas = function () {
     this.context.clearRect(
         0, 0, this.canvas.width, this.canvas.height
@@ -77,8 +102,8 @@ Board.prototype.clear_canvas = function () {
 };
 
 Board.prototype.render_canvas = function () {
-    /* There is not point in re rendering when nothing is spawned */
-    if (this.spawned) {
+    /* There is not point in re rendering when nothing is spawned or nothing is dragged */
+    if (this.spawned || this.dragged) {
         /*
             This says something like this.
             Consider the point (current_ball_position_x, current_ball_position_y) the center of a circle with radius
@@ -107,7 +132,7 @@ Board.prototype.behave = function () {
     if (this.spawned && !this.dragged) {
         this.gravity();
         this.bounce();
-        // this.apply_forces();
+        this.apply_forces();
 
         this.render();
     }
@@ -136,6 +161,15 @@ function _set_canvas_size(canvas_id) {
     }
 }
 
+function in_ball(circle_x, circle_y, circle_radius, point_x, point_y) {
+    let point_position = Math.pow(
+        point_x - circle_x, 2
+    ) + Math.pow(
+        point_y - circle_y, 2
+    );
+    return point_position < Math.pow(circle_radius, 2)
+}
+
 function main() {
     let board = new Board();
     let set_canvas_size;
@@ -145,6 +179,8 @@ function main() {
     board.context = board.canvas.getContext("2d");
 
     board.canvas.addEventListener("click", board.click_handler.bind(board));
+    board.canvas.addEventListener("mousemove", board.mouse_move_handler.bind(board));
+    board.canvas.addEventListener("mouseup", board.mouse_up_handler.bind(board));
 
     set_canvas_size = _set_canvas_size(board.canvas.id);
     set_canvas_size();
