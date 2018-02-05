@@ -1,5 +1,21 @@
 # Bounce
-A simulation of a bouncing ball
+A simulation of a bouncing ball.
+
+<div>
+    <p>Status</p>
+</div>
+
+<div style="padding: 5px">
+    <a href="https://travis-ci.org/mayk93/Bounce">
+        <img src="https://travis-ci.org/mayk93/Bounce.svg?branch=master">
+    </a>
+</div>
+
+<div style="padding: 5px">
+    <a href="https://coveralls.io/github/mayk93/Bounce?branch=master">
+        <img src="https://coveralls.io/repos/github/mayk93/Bounce/badge.svg?branch=master">
+    </a>
+</div>
 
 ---
 
