@@ -15,6 +15,9 @@ function Board() {
     this.current_ball_position_y = null;
 
     /* Forces */
+    this.applied_force_x = 0;
+    this.applied_force_y = 0;
+
     this.force_x = 0;
     this.force_y = 0;
 
@@ -23,6 +26,9 @@ function Board() {
     this.ball_start_angle = 0;
     this.ball_end_angle = 2 * Math.PI;
     this.gravitational_acceleration = 9.75;
+
+    this.force_modifier_x = 50;
+    this.force_modifier_y = 50;
 }
 
 /* Start Handler section */
@@ -30,6 +36,11 @@ Board.prototype.spawn = function (x, y) {
     this.spawned = true;
     this.current_ball_position_x = x;
     this.current_ball_position_y = y;
+
+    /* When we 'spawn' the ball, we drop it, thus we need to apply a little force to it. */
+    if (this.canvas) {
+        this.applied_force_y = (1 - (y / this.canvas.height)) * this.force_modifier_y;
+    }
 };
 
 Board.prototype.drag = function (x, y) {
@@ -37,8 +48,15 @@ Board.prototype.drag = function (x, y) {
     this.current_ball_position_y += y;
 };
 
-Board.prototype.drag_stop = function () {
-    this.dragged = false;
+Board.prototype.drag_stop = function (x, y) {
+    if (this.dragged) {
+        this.dragged = false;
+
+        /* When we stop dragging the ball, we drop it, thus we need to apply a little force to it. */
+        if (this.canvas) {
+            this.applied_force_y = (1 - (y / this.canvas.height)) * this.force_modifier_y;
+        }
+    }
 };
 
 Board.prototype.click_handler = function (event) {
@@ -86,24 +104,40 @@ Board.prototype.bounce = function () {
     if (this.current_ball_position_x - this.ball_radius < 0) {
         /* Left side */
         this.current_ball_position_x = this.ball_radius;
-        this.force_x = 50; // We want to 'bounce' left
+
+        // We want to 'bounce' left with a force equal to the currently applied force.
+        this.force_x = this.applied_force_x;
+        // Every time we apply the force, we decrease it a little bit.
+        this.applied_force_x /= 1.2;
     }
     if (this.current_ball_position_x + this.ball_radius > width_limit) {
         /* Right side */
         this.current_ball_position_x = width_limit;
-        this.force_x = -50; // We want to 'bounce' right
+        this.force_x = -this.applied_force_x; // We want to 'bounce' right
+        this.applied_force_x /= 1.2;
     }
 
     /* Height */
     if (this.current_ball_position_y - this.ball_radius < 0) {
         /* Top side */
         this.current_ball_position_y = this.ball_radius;
-        this.force_y = 50; // We want to bounce 'down'
+        this.force_y = this.applied_force_y; // We want to bounce 'down'
+        this.applied_force_y /= 1.2;
     }
     if (this.current_ball_position_y > height_limit) {
         /* Bottom side */
         this.current_ball_position_y = height_limit;
-        this.force_y = -50; // We want to bounce 'up'
+        this.force_y = -this.applied_force_y; // We want to bounce 'up'
+        this.applied_force_y /= 1.2;
+    }
+
+    /* Force stop */
+    /* In order to avoid perpetual bounce, we just set the applied force to zero once it gets too small. */
+    if (this.applied_force_x < 0.1) {
+        this.applied_force_x = 0
+    }
+    if (this.applied_force_y < 0.1) {
+        this.applied_force_y = 0
     }
 };
 
@@ -222,7 +256,7 @@ function main() {
 
     board.canvas.addEventListener("click", board.click_handler.bind(board));
     board.canvas.addEventListener("mousemove", board.mouse_move_handler.bind(board));
-    board.canvas.addEventListener("mouseup", board.mouse_up_handler.bind(board));
+    window.addEventListener("mouseup", board.mouse_up_handler.bind(board));
 
     set_canvas_size = _set_canvas_size(board.canvas.id);
     set_canvas_size();
