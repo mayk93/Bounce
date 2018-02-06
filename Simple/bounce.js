@@ -8,6 +8,9 @@ let ball_start_angle = 0;
 let ball_end_angle = 2 * Math.PI;
 let gravitational_acceleration = 9.75;
 
+let click_counter = 0;
+let ball_counter = 0;
+
 /* ----- # ----- # ----- # ----- */
 /* Ball Class */
 /* ----- # ----- # ----- # ----- */
@@ -212,6 +215,10 @@ Board.prototype.behave = function () {
     this.balls = this.balls.filter(function (ball) {
         return ball !== null && ball.collisions < 100;
     });
+    ball_counter = this.balls.length;
+
+    document.getElementById("ball_counter").innerHTML = `${ball_counter} balls`;
+    document.getElementById("click_counter").innerHTML = `${click_counter} clicks`;
 
     this.render();
 };
@@ -223,6 +230,9 @@ Board.prototype.click_handler = function (event) {
     new_ball.spawn(event.pageX, event.pageY);
 
     this.balls.push(new_ball);
+
+    click_counter += 1;
+    ball_counter = this.balls.length;
 };
 
 /* Functions */
@@ -237,6 +247,17 @@ function create_canvas(id="bounce_canvas") {
     document.getElementById("main").appendChild(new_canvas);
 
     return new_canvas;
+}
+
+function create_counters() {
+    let ball_counter_div = document.createElement("div");
+    let click_counter_div = document.createElement("div");
+
+    ball_counter_div.setAttribute("id", "ball_counter");
+    click_counter_div.setAttribute("id", "click_counter");
+
+    document.getElementById("main").appendChild(ball_counter_div);
+    document.getElementById("main").appendChild(click_counter_div);
 }
 
 function _set_canvas_size(canvas_id) {

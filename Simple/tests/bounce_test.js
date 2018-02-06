@@ -26,14 +26,14 @@ describe("Canvas Creation", function () {
 
     it("should not have a canvas", function () {
         /* We check specifically for test_bounce_canvas */
-        expect(main.childNodes.length).toEqual(1);
+        expect(main.childNodes.length).toEqual(3);
         expect(main.childNodes[0].id).not.toEqual(test_bounce_canvas_id);
         expect(document.getElementById(test_bounce_canvas_id)).toBeNull();
     });
 
     it("should have a canvas child after initialization", function () {
         create_canvas(test_bounce_canvas_id);
-        expect(main.childNodes.length).toEqual(2);
+        expect(main.childNodes.length).toEqual(4);
         expect(document.getElementById(test_bounce_canvas_id)).toBeDefined();
     })
 });

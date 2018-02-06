@@ -8,6 +8,8 @@ function main() {
     let set_canvas_size;
     let render_interval = 10;
 
+    create_counters();
+
     board.canvas = create_canvas();
     board.context = board.canvas.getContext("2d");
 
