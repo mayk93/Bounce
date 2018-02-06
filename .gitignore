@@ -1,5 +1,6 @@
 # Node
 node_modules/
+*_env/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

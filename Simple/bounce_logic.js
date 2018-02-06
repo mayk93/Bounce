@@ -8,7 +8,10 @@ function main() {
     let set_canvas_size;
     let render_interval = 10;
 
+    let score_update_interval = 10000;
+
     create_counters();
+    create_ledger();
 
     board.canvas = create_canvas();
     board.context = board.canvas.getContext("2d");
@@ -20,6 +23,9 @@ function main() {
     window.onresize = set_canvas_size;
 
     setInterval(board.behave.bind(board), render_interval);
+
+    score_update();
+    setInterval(score_update, score_update_interval);
 }
 
 if (document.addEventListener) {

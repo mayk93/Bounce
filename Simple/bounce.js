@@ -11,6 +11,9 @@ let gravitational_acceleration = 9.75;
 let click_counter = 0;
 let ball_counter = 0;
 
+let user = "";
+let scores = [];
+
 /* ----- # ----- # ----- # ----- */
 /* Ball Class */
 /* ----- # ----- # ----- # ----- */
@@ -220,6 +223,8 @@ Board.prototype.behave = function () {
     document.getElementById("ball_counter").innerHTML = `${ball_counter} balls`;
     document.getElementById("click_counter").innerHTML = `${click_counter} clicks`;
 
+    populate_ledger();
+
     this.render();
 };
 
@@ -258,6 +263,45 @@ function create_counters() {
 
     document.getElementById("main").appendChild(ball_counter_div);
     document.getElementById("main").appendChild(click_counter_div);
+}
+
+function create_ledger() {
+    let ledger = document.createElement("ul");
+    ledger.setAttribute("id", "ledger");
+
+    document.getElementById("main").appendChild(ledger);
+}
+
+function populate_ledger() {
+    scores.map(function (score) {
+        let score_element = document.createElement("li");
+        score_element.innerHTML = `User ${score.user} has ${score.click_counter} click score and ${score.ball_counter} ball score`;
+        document.getElementById("ledger").appendChild(score_element);
+    })
+
+    scores = [];
+}
+
+function score_update() {
+    console.log('Score update')
+
+    // let server = "https://myapps.gallery:8000";
+    let server = "http://localhost:8000";
+
+    let xhttp = new XMLHttpRequest();
+
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            scores = JSON.parse(this.responseText).scores;
+        }
+    };
+
+    console.log("Sending to");
+    console.log(`${server}/scores`)
+
+    xhttp.open("POST", `${server}/scores`, true);
+    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.send(JSON.stringify({"user": user, "click_counter": click_counter, "ball_counter": click_counter}));
 }
 
 function _set_canvas_size(canvas_id) {
