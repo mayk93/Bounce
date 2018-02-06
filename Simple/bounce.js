@@ -273,20 +273,34 @@ function create_ledger() {
 }
 
 function populate_ledger() {
+    if (scores.length) {
+        document.getElementById("ledger").innerHTML = "";
+    }
+
     scores.map(function (score) {
         let score_element = document.createElement("li");
         score_element.innerHTML = `User ${score.user} has ${score.click_counter} click score and ${score.ball_counter} ball score`;
         document.getElementById("ledger").appendChild(score_element);
-    })
+    });
 
     scores = [];
 }
 
+function create_input() {
+    let input_element =  document.createElement("input");
+    input_element.setAttribute("id", "input_element");
+    input_element.onchange = function (event) {
+        user = event.target.value;
+    }
+
+    document.getElementById("main").appendChild(input_element);
+};
+
 function score_update() {
     console.log('Score update')
 
-    // let server = "https://myapps.gallery:8000";
-    let server = "http://localhost:8000";
+    let server = "https://myapps.gallery:8000";
+    // let server = "http://localhost:8000";
 
     let xhttp = new XMLHttpRequest();
 
@@ -301,7 +315,7 @@ function score_update() {
 
     xhttp.open("POST", `${server}/scores`, true);
     xhttp.setRequestHeader("Content-type", "application/json");
-    xhttp.send(JSON.stringify({"user": user, "click_counter": click_counter, "ball_counter": click_counter}));
+    xhttp.send(JSON.stringify({"user": user, "click_counter": click_counter, "ball_counter": ball_counter}));
 }
 
 function _set_canvas_size(canvas_id) {

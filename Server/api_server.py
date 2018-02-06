@@ -7,6 +7,8 @@ import os
 import sys
 import json
 
+from datetime import datetime
+
 # Logging
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -18,7 +20,7 @@ api = hug.API(__name__)
 api.http.add_middleware(CORSMiddleware(api, allow_origins=["*"]))
 
 @hug.post('/scores')
-def autocomplete(*args, **kwargs):
+def scores(*args, **kwargs):
     logging.info("Args")
     logging.info(args)
 
@@ -31,6 +33,19 @@ def autocomplete(*args, **kwargs):
     print("Kwargs")
     print(kwargs)
 
+    mongo.route("balls").insert({
+        "user": kwargs["user"], "click_counter": kwargs["click_counter"], "ball_counter": kwargs["ball_counter"], "time": datetime.now()
+    })
+
+
+    scores = []
+
+    for entry in mongo.route("balls").find({}):
+        scores.append({
+            "user": entry["user"], "click_counter": entry["click_counter"], "ball_counter": entry["ball_counter"],
+            "time": entry["time"]
+        })
+
     return {
-        "scores": [{"user": "hardcoded", "click_counter": "hardcoded", "ball_counter": "hardcoded"}]
+        "scores": scores
     }
