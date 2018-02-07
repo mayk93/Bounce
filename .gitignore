@@ -1,6 +1,8 @@
 # Node
 node_modules/
 *_env/
+.ideea
+.DS_Store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
