@@ -8,11 +8,11 @@ function main() {
     let set_canvas_size;
     let render_interval = 10;
 
-    let score_update_interval = 5000;
+    // let score_update_interval = 5000;
 
     create_counters();
-    create_ledger();
-    create_input();
+    // create_ledger();
+    // create_input();
 
     board.canvas = create_canvas();
     board.context = board.canvas.getContext("2d");
@@ -25,8 +25,8 @@ function main() {
 
     setInterval(board.behave.bind(board), render_interval);
 
-    score_update();
-    setInterval(score_update, score_update_interval);
+    // score_update();
+    // setInterval(score_update, score_update_interval);
 }
 
 if (document.addEventListener) {
