@@ -17,7 +17,7 @@ import FloatingActionButton from 'material-ui/FloatingActionButton';
 
 
 /* My libs / components */
-import {Board} from '../logic/Board';
+import Board from '../logic/Board';
 
 /* Actions */
 import {set_render_interval} from '../actions';
@@ -30,8 +30,13 @@ import {flex_container, flex_90, flex_10} from '../style/js/Flex';
 class Bounce extends Component {
     constructor(props) {
         super(props);
-        this.board = new Board();
-        this.render_id = setInterval(this.board.behave.bind(this.board), this.props.render_interval);
+        this.board = null;
+        this.render_id = null;
+    }
+
+    componentDidMount() {
+         this.board = new Board();
+         this.render_id = setInterval(this.board.behave.bind(this.board), this.props.render_interval);
     }
 
     componentWillReceiveProps (next_props) {
@@ -76,7 +81,9 @@ class Bounce extends Component {
                         </div>
                     </Card>
 
-                    <div id="main"><canvas id="canvas"></canvas></div>
+                    <div id="main"><canvas id="canvas" style={{
+                        width: "90%", height: "75%", border: "solid", margin: "5%"
+                    }}></canvas></div>
                 </div>
             </MuiThemeProvider>
         );
