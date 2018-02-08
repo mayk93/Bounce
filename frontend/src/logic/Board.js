@@ -8,14 +8,37 @@ import Ball from './Ball';
 /* Constants */
 import {ball_radius, ball_start_angle, ball_end_angle} from '../utils/constants';
 
+/* Style and CSS */
+import '../style/css/Board.css';
+
 class Board {
     constructor() {
-        this.canvas = document.getElementById("canvas");
-        this.context = this.canvas.getContext("2d");
-
+        /* Canvas creation and definition */
+        this.canvas = document.createElement("canvas");
+        this.canvas.setAttribute("id", "main_canvas");
+        this.canvas.setAttribute("class", "canvas_class");
         this.canvas.addEventListener("click", this.click_handler.bind(this));
 
+        /* Canvas size and resize */
+        this.set_canvas_size();
+        window.onresize = this.set_canvas_size.bind(this);
+
+        /* Context */
+        this.context = this.canvas.getContext("2d");
+
+        /* Document insertion */
+        document.getElementById("main").appendChild(this.canvas);
+
+        /* Board logic data */
+        this.root_height = document.getElementById("root").offsetHeight;
+        console.log(this.root_height)
+
         this.balls = [];
+    }
+
+    set_canvas_size() {
+        this.canvas.setAttribute("width", window.innerWidth );
+        this.canvas.setAttribute("height", window.innerHeight);
     }
 
     /* Start Rendering section */
@@ -45,8 +68,6 @@ class Board {
                     ball_radius,
                     ball_start_angle, ball_end_angle
                 );
-                self.context.fillStyle = "black";
-                self.context.fill();
                 self.context.stroke();
 
                 // console.log("Ball rendered");
@@ -62,16 +83,18 @@ class Board {
 
     click_handler(event) {
         let new_ball = new Ball();
+        let x = event.pageX;
+        let y = event.pageY - this.root_height;
 
         new_ball.ball_id = (+new Date()).toString();
         new_ball.canvas = this.canvas;
-        new_ball.spawn(event.pageX, event.pageY);
+        new_ball.spawn(x, y);
 
         this.balls.push(new_ball);
     }
 
     behave() {
-        // let self = this;
+        let self = this;
 
         this.balls.map(function (ball) {
             if (ball.collisions > 100) {
@@ -79,7 +102,7 @@ class Board {
             }
 
             if (ball) {
-                // ball.gravity();
+                ball.gravity();
                 // ball.bounce(self.balls);
                 // ball.apply_forces();
             }
@@ -97,7 +120,6 @@ class Board {
 
     /* Important! Not the React Render. Render for canvas. */
     render() {
-        // console.log('Rendering board.');
         this.clear_canvas();
         this.render_canvas();
     }
