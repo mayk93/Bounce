@@ -19,7 +19,12 @@ A simulation of a bouncing ball.
 
 ---
 
+---
+![alt text](./example.gif "Logo Title Text 1")
+---
+
 Installation:
+---
 
 1. `git clone git@github.com:mayk93/Bounce.git`
 
@@ -40,6 +45,7 @@ but other tests have been disabled. The tests for the `Board` class are enabled.
 ---
 
 How it works:
+---
 
 The project is set up like this. I will be referring to `index.html`. The different between
 `index.html` and `index_test.html` is that `index_test.html` imports `jasmine` and runs the `specs`.
@@ -65,8 +71,11 @@ I have also deployed the project on a amazon instance that I rent. The setup is 
 ---
 
 Deployment:
+---
 
-A demo of the project can be seen on my [website](https://myapps.gallery/).
+[Bounce app](https://projects.myapps.gallery/bounce/).
+
+[You can check out my other projects here](https://myapps.gallery/).
 
 ---
    
