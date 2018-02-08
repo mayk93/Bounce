@@ -5,7 +5,7 @@ import React, {Component} from 'react';
 import HostedOn from 'hosted_on';
 
 /* My libs / components */
-import Bounce from './components/Bounce';
+import Bounce from './containers/Bounce';
 
 /* Style and CSS */
 import './App.css';
