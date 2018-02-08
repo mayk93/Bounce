@@ -35,6 +35,27 @@ class Ball {
         }
     }
 
+    apply_forces() {
+        this.current_ball_position_x += this.force_x;
+        this.current_ball_position_y += this.force_y;
+
+        if (this.force_x != 0) {
+            if (this.force_x > 0) {
+                this.force_x -= 1;
+            } else if (this.force_x < 0) {
+                this.force_x += 1;
+            }
+        }
+
+        if (this.force_y != 0) {
+            if (this.force_y > 0) {
+                this.force_y -= 1;
+            } else if (this.force_y < 0) {
+                this.force_y += 1;
+            }
+        }
+    }
+
     gravity() {
         this.current_ball_position_y += gravitational_acceleration;
     }

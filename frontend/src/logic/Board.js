@@ -97,7 +97,7 @@ class Board {
             if (ball) {
                 ball.gravity();
                 ball.bounce(self.balls);
-                // ball.apply_forces();
+                ball.apply_forces();
             }
 
             return null;
