@@ -1,7 +1,7 @@
 # Node
 node_modules/
 *_env/
-.ideea
+.idea
 .DS_Store
 
 # Byte-compiled / optimized / DLL files
