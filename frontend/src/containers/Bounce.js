@@ -47,8 +47,6 @@ class Bounce extends Component {
     }
 
     render() {
-        console.log(this.props.render_interval);
-
         return (
             <MuiThemeProvider>
                 <div>
@@ -80,10 +78,6 @@ class Bounce extends Component {
                             </div>
                         </div>
                     </Card>
-
-                    <div id="main"><canvas id="canvas" style={{
-                        width: "90%", height: "75%", border: "solid", margin: "5%"
-                    }}></canvas></div>
                 </div>
             </MuiThemeProvider>
         );

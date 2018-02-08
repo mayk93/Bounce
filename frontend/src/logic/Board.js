@@ -3,17 +3,17 @@
  */
 
 /* My libs / components */
-import {Ball} from './Ball';
+import Ball from './Ball';
 
 /* Constants */
-import {ball_radius, ball_start_angle, ball_end_angle, gravitational_acceleration} from '../utils/constants';
+import {ball_radius, ball_start_angle, ball_end_angle} from '../utils/constants';
 
 class Board {
     constructor() {
         this.canvas = document.getElementById("canvas");
         this.context = this.canvas.getContext("2d");
 
-        // this.canvas.addEventListener("click", this.click_handler.bind(this));
+        this.canvas.addEventListener("click", this.click_handler.bind(this));
 
         this.balls = [];
     }
@@ -37,6 +37,7 @@ class Board {
                 Draw the contour of that circle starting at 0 radians ( where sin(x) = 0 and cos(x) = 1 ) and end
                 after 2PI radians ( same place, so a full circle )
             */
+
             if (ball) {
                 self.context.beginPath();
                 self.context.arc(
@@ -44,12 +45,22 @@ class Board {
                     ball_radius,
                     ball_start_angle, ball_end_angle
                 );
+                self.context.fillStyle = "black";
+                self.context.fill();
                 self.context.stroke();
+
+                // console.log("Ball rendered");
+                // console.log(ball.current_ball_position_x, ball.current_ball_position_y);
+                // console.log(ball_radius);
+                // console.log(ball_start_angle, ball_end_angle);
+                // console.log("-----");
             }
+
+            return null;
         })
     };
 
-    click_handler() {
+    click_handler(event) {
         let new_ball = new Ball();
 
         new_ball.ball_id = (+new Date()).toString();
@@ -60,7 +71,7 @@ class Board {
     }
 
     behave() {
-        let self = this;
+        // let self = this;
 
         this.balls.map(function (ball) {
             if (ball.collisions > 100) {
@@ -68,10 +79,12 @@ class Board {
             }
 
             if (ball) {
-                ball.gravity();
+                // ball.gravity();
                 // ball.bounce(self.balls);
                 // ball.apply_forces();
             }
+
+            return null;
         });
 
         this.balls = this.balls.filter(function (ball) {
@@ -84,9 +97,10 @@ class Board {
 
     /* Important! Not the React Render. Render for canvas. */
     render() {
+        // console.log('Rendering board.');
         this.clear_canvas();
         this.render_canvas();
     }
 }
 
-module.exports.Board = Board;
+export default Board;
