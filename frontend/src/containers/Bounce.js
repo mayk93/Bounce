@@ -13,30 +13,37 @@ import {bindActionCreators} from 'redux';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import {Card, CardHeader} from 'material-ui/Card';
 import Slider from 'material-ui/Slider';
+import FloatingActionButton from 'material-ui/FloatingActionButton';
+
 
 /* My libs / components */
-import {bounce_logic} from '../logic/bounce_logic';
+import {Board} from '../logic/Board';
 
 /* Actions */
 import {set_render_interval} from '../actions';
 
 /* Style and CSS */
 import {outer_card_style, text_style} from '../style/js/styles';
+import {flex_container, flex_90, flex_10} from '../style/js/Flex';
+
 
 class Bounce extends Component {
     constructor(props) {
         super(props);
-        this.render_id = setInterval(bounce_logic, this.props.render_interval);
+        this.board = new Board();
+        this.render_id = setInterval(this.board.behave.bind(this.board), this.props.render_interval);
     }
 
     componentWillReceiveProps (next_props) {
         if (this.props.render_interval !== next_props.render_interval) {
             clearInterval(this.render_id);
-            setInterval(bounce_logic, this.props.render_interval);
+            this.render_id = setInterval(this.board.behave.bind(this.board), next_props.render_interval);
         }
     }
 
     render() {
+        console.log(this.props.render_interval);
+
         return (
             <MuiThemeProvider>
                 <div>
@@ -55,7 +62,18 @@ class Bounce extends Component {
                             textStyle={text_style}
                         />
 
-                        <Slider min={1} max={1000} defaultValue={10} />
+                        <div style={flex_container}>
+                            <div style={flex_90}>
+                                <Slider min={1} max={1000} defaultValue={10} step={1}
+                                        onChange={(event, new_value) => {this.props.set_render_interval(new_value)}}
+                                />
+                            </div>
+                            <div style={flex_10}>
+                                <FloatingActionButton backgroundColor="gray">
+                                    <div style={{color: "white"}}>{this.props.render_interval}</div>
+                                </FloatingActionButton>
+                            </div>
+                        </div>
                     </Card>
 
                     <div id="main"><canvas id="canvas"></canvas></div>
