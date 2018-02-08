@@ -31,7 +31,6 @@ class Board {
 
         /* Board logic data */
         this.root_height = document.getElementById("root").offsetHeight;
-        console.log(this.root_height)
 
         this.balls = [];
     }
@@ -69,12 +68,6 @@ class Board {
                     ball_start_angle, ball_end_angle
                 );
                 self.context.stroke();
-
-                // console.log("Ball rendered");
-                // console.log(ball.current_ball_position_x, ball.current_ball_position_y);
-                // console.log(ball_radius);
-                // console.log(ball_start_angle, ball_end_angle);
-                // console.log("-----");
             }
 
             return null;
@@ -103,7 +96,7 @@ class Board {
 
             if (ball) {
                 ball.gravity();
-                // ball.bounce(self.balls);
+                ball.bounce(self.balls);
                 // ball.apply_forces();
             }
 
