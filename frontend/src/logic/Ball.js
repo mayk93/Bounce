@@ -113,10 +113,15 @@ class Ball {
                 ) {
                     self.collisions += 1;
 
-                    self.force_x = [-1, 1][Math.floor(Math.random() * 2)] * (Math.random() * 25 + 10);
+                    let force_direction = [-1, 1][Math.floor(Math.random() * 2)];
+
+                    self.force_x = force_direction * (Math.random() * 25 + 10);
+                    other_ball.force_x = -force_direction * (Math.random() * 25 + 10);
+
                     self.applied_force_y = (
                         1 - (self.current_ball_position_y / self.canvas.height)
                     ) * Math.random() * 50 + 25;
+                    other_ball.applied_force_y = -50;
                 }
             });
         }
